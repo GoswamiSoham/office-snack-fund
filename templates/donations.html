@@ -110,6 +110,11 @@
             color: #333;
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.0/css/all.min.css"/>
+    <script src="https://kit.fontawesome.com/YOUR_KIT_CODE.js" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -382,7 +387,7 @@
 
     <a href="/edit-donation/{{ donation.id }}"
        style="color: blue; margin-right: 10px;">
-        ✏️ Edit
+        <i class="fa-solid fa-pen-to-square"></i>Edit
     </a>
 
     <form
@@ -403,7 +408,7 @@
                 margin:0;
             "
         >
-            🗑️ Delete
+            <i class="fa-solid fa-trash"></i>Delete
         </button>
 
     </form>

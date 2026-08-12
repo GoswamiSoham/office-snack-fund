@@ -24,6 +24,11 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.0/css/all.min.css"/>
+    <script src="https://kit.fontawesome.com/YOUR_KIT_CODE.js" crossorigin="anonymous"></script>
+
+
 </head>
 
 
@@ -98,7 +103,7 @@
 
 
         <a href="/logout">
-            🚪
+            <i class="fa-solid fa-right-from-bracket fa-xl"></i>
         </a>
 
     </div>
@@ -210,7 +215,8 @@
                 </span>
 
                 <span class="summary-icon">
-                    💰
+                    
+                    <i class="fa-solid fa-wallet fa-lg"></i>
                 </span>
 
             </div>
@@ -244,7 +250,7 @@
                 </span>
 
                 <span class="summary-icon">
-                    ➕
+                    <i class="fa-solid fa-hand-holding-heart fa-lg"></i>
                 </span>
 
             </div>
@@ -278,7 +284,7 @@
                 </span>
 
                 <span class="summary-icon">
-                    🍪
+                    <i class="fa-solid fa-indian-rupee-sign fa-lg"></i>
                 </span>
 
             </div>
@@ -661,6 +667,16 @@
                         data: chartData.map(
                             item => item.amount
                         ),
+                        backgroundColor: [
+                            "#198754",  // Donations - green
+                            "#dc3545"   // Expenses - red
+                        ],
+                        borderColor: [
+                            "#198754",
+                            "#dc3545"
+                        ],
+
+                        borderWidth: 1,
 
                         borderRadius: 8
 
@@ -793,6 +809,8 @@
 
         }
     );
+
+
 
 </script>
 
