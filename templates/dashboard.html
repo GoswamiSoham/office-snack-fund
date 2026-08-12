@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Dashboard - Office Snack Fund</title>
+
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+
+    <!-- Chart.js -->
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================
+     NAVIGATION
+     ===================================== -->
+
+<nav class="navbar">
+
+    <a
+        href="/"
+        class="brand"
+    >
+        🍪 Office Snack Fund
+    </a>
+
+
+    <div class="nav-links">
+
+        <a
+            href="/"
+            class="active"
+        >
+            Dashboard
+        </a>
+
+
+        <a href="/donations">
+            Donations
+        </a>
+
+
+        <a href="/expenses">
+            Expenses
+        </a>
+
+
+        {% if session["role"] == "admin" %}
+
+        <a href="/users">
+            Users
+        </a>
+
+        {% endif %}
+
+    </div>
+
+
+    <div class="user-menu">
+
+        <div class="user-avatar">
+
+            {{ session["full_name"][0] | upper }}
+
+        </div>
+
+
+        <div class="user-info">
+
+            <div class="user-name">
+                {{ session["full_name"] }}
+            </div>
+
+            <div class="user-role">
+                {{ session["role"] }}
+            </div>
+
+        </div>
+
+
+        <a href="/logout">
+            🚪
+        </a>
+
+    </div>
+
+</nav>
+
+
+
+<!-- =====================================
+     MAIN CONTENT
+     ===================================== -->
+
+<main class="dashboard-container">
+
+
+    <!-- WELCOME -->
+
+    <section class="welcome-section">
+
+        <h1>
+            Welcome back,
+            {{ session["full_name"] }} 👋
+        </h1>
+
+        <p>
+            Here's your office snack fund overview.
+        </p>
+
+    </section>
+
+
+
+    <!-- =====================================
+         MONTH FILTER
+         ===================================== -->
+
+    <section class="period-card">
+
+        <div>
+
+            <div class="period-title">
+                📅 Dashboard Period
+            </div>
+
+            <div class="summary-description">
+                Select a month to view its fund activity.
+            </div>
+
+        </div>
+
+
+        <form method="GET" action="/">
+            {% if session["role"] == "admin" %}
+
+                <div style="
+                    display: flex;
+                    justify-content: flex-end;
+                    margin-bottom: 25px;
+                ">
+
+                    <a
+                        href="/download-dashboard-report?month={{ selected_month }}"
+                        style="
+                            display: inline-block;
+                            padding: 11px 18px;
+                            background: #198754;
+                            color: white;
+                            text-decoration: none;
+                            border-radius: 7px;
+                            font-size: 14px;
+                            font-weight: 600;
+                        "
+                    >
+                        📥 Download Monthly Statement
+                    </a>
+
+                </div>
+
+{% endif %}
+
+            <input
+                type="month"
+                name="month"
+                value="{{ selected_month }}"
+                onchange="this.form.submit()"
+            >
+
+        </form>
+
+    </section>
+
+
+
+    <!-- =====================================
+         SUMMARY CARDS
+         ===================================== -->
+
+    <section class="summary-grid">
+
+
+        <!-- MONTHLY BALANCE -->
+
+        <div class="summary-card">
+
+            <div class="summary-card-header">
+
+                <span class="summary-title">
+                    Monthly Balance
+                </span>
+
+                <span class="summary-icon">
+                    💰
+                </span>
+
+            </div>
+
+
+            <div class="summary-value">
+
+                ₹{{ "%.2f"|format(balance) }}
+
+            </div>
+
+
+            <div class="summary-description">
+
+                Donations minus expenses
+
+            </div>
+
+        </div>
+
+
+
+        <!-- DONATIONS -->
+
+        <div class="summary-card">
+
+            <div class="summary-card-header">
+
+                <span class="summary-title">
+                    Donations
+                </span>
+
+                <span class="summary-icon">
+                    ➕
+                </span>
+
+            </div>
+
+
+            <div class="summary-value">
+
+                ₹{{ "%.2f"|format(total_donations) }}
+
+            </div>
+
+
+            <div class="summary-description">
+
+                Total collected this month
+
+            </div>
+
+        </div>
+
+
+
+        <!-- EXPENSES -->
+
+        <div class="summary-card">
+
+            <div class="summary-card-header">
+
+                <span class="summary-title">
+                    Expenses
+                </span>
+
+                <span class="summary-icon">
+                    🍪
+                </span>
+
+            </div>
+
+
+            <div class="summary-value">
+
+                ₹{{ "%.2f"|format(total_expenses) }}
+
+            </div>
+
+
+            <div class="summary-description">
+
+                Total spent this month
+
+            </div>
+
+        </div>
+
+
+
+        <!-- CONTRIBUTORS -->
+
+        <div class="summary-card">
+
+            <div class="summary-card-header">
+
+                <span class="summary-title">
+                    Contributors
+                </span>
+
+                <span class="summary-icon">
+                    👥
+                </span>
+
+            </div>
+
+
+            <div class="summary-value">
+
+                {{ contributors }}
+
+            </div>
+
+
+            <div class="summary-description">
+
+                Members who donated this month
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================
+         CHARTS
+         ===================================== -->
+
+    <section class="dashboard-two-column">
+
+
+        <!-- DONATION VS EXPENSE -->
+
+        <div class="dashboard-card">
+
+            <div class="dashboard-card-header">
+
+                <div>
+
+                    <h2>
+                        📊 Donations vs Expenses
+                    </h2>
+
+                    <p>
+                        Selected month's fund activity
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="chart-container">
+
+                <canvas id="donationExpenseChart"></canvas>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- BALANCE TREND -->
+
+        <div class="dashboard-card">
+
+            <div class="dashboard-card-header">
+
+                <div>
+
+                    <h2>
+                        📈 Balance Trend
+                    </h2>
+
+                    <p>
+                        Running balance during the month
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="chart-container">
+
+                <canvas id="balanceTrendChart"></canvas>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =====================================
+         RECENT + TOP CONTRIBUTORS
+         ===================================== -->
+
+    <section class="dashboard-two-column">
+
+
+        <!-- RECENT TRANSACTIONS -->
+
+        <div class="dashboard-card">
+
+            <div class="dashboard-card-header">
+
+                <div>
+
+                    <h2>
+                        🕐 Recent Transactions
+                    </h2>
+
+                    <p>
+                        Latest activity for this month
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            {% if recent_transactions %}
+
+            <div class="transaction-list">
+
+
+                {% for transaction in recent_transactions %}
+
+                <div class="transaction-row">
+
+
+                    <div class="transaction-icon">
+
+                        {% if transaction.transaction_type == "Donation" %}
+
+                            🟢
+
+                        {% else %}
+
+                            🔴
+
+                        {% endif %}
+
+                    </div>
+
+
+                    <div class="transaction-info">
+
+                        <strong>
+
+                            {{ transaction.description }}
+
+                        </strong>
+
+
+                        <span>
+
+                            {{ transaction.transaction_type }}
+
+                            ·
+
+                            {{ transaction.date | datetime }}
+
+                        </span>
+
+                    </div>
+
+
+                    <div
+                        class="
+                        transaction-amount
+                        {% if transaction.transaction_type == 'Donation' %}
+                        income
+                        {% else %}
+                        expense
+                        {% endif %}
+                        "
+                    >
+
+                        {% if transaction.transaction_type == "Donation" %}
+
+                            +
+
+                        {% else %}
+
+                            -
+
+                        {% endif %}
+
+                        ₹{{ "%.2f"|format(transaction.amount) }}
+
+                    </div>
+
+
+                </div>
+
+                {% endfor %}
+
+
+            </div>
+
+            {% else %}
+
+            <div class="empty-state">
+
+                No transactions found for this month.
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+
+
+        <!-- TOP CONTRIBUTORS -->
+
+        <div class="dashboard-card">
+
+            <div class="dashboard-card-header">
+
+                <div>
+
+                    <h2>
+                        🏆 Top Contributors
+                    </h2>
+
+                    <p>
+                        Highest contributions this month
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            {% if top_contributors %}
+
+            <div class="contributors-list">
+
+
+                {% for contributor in top_contributors %}
+
+                <div class="contributor-row">
+
+
+                    <div class="rank">
+
+                        {{ loop.index }}
+
+                    </div>
+
+
+                    <div class="contributor-avatar">
+
+                        {{ contributor.donor_name[0] | upper }}
+
+                    </div>
+
+
+                    <div class="contributor-name">
+
+                        {{ contributor.donor_name }}
+
+                    </div>
+
+
+                    <div class="contributor-amount">
+
+                        ₹{{ "%.2f"|format(contributor.total) }}
+
+                    </div>
+
+
+                </div>
+
+                {% endfor %}
+
+
+            </div>
+
+            {% else %}
+
+            <div class="empty-state">
+
+                No contributors found for this month.
+
+            </div>
+
+            {% endif %}
+
+        </div>
+
+    </section>
+
+
+</main>
+
+
+
+<!-- =====================================
+     CHART JAVASCRIPT
+     ===================================== -->
+
+<script>
+
+    const chartData =
+        {{ chart_data | tojson }};
+
+
+    const balanceTrend =
+        {{ balance_trend | tojson }};
+
+
+
+    // =====================================
+    // DONATION VS EXPENSE CHART
+    // =====================================
+
+    const donationExpenseCanvas =
+        document.getElementById(
+            "donationExpenseChart"
+        );
+
+
+    new Chart(
+        donationExpenseCanvas,
+        {
+
+            type: "bar",
+
+            data: {
+
+                labels: chartData.map(
+                    item => item.name
+                ),
+
+                datasets: [
+
+                    {
+
+                        label: "Amount",
+
+                        data: chartData.map(
+                            item => item.amount
+                        ),
+
+                        borderRadius: 8
+
+                    }
+
+                ]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+                        display: false
+                    }
+
+                },
+
+                scales: {
+
+                    y: {
+
+                        beginAtZero: true,
+
+                        ticks: {
+
+                            callback: function(value) {
+
+                                return "₹" +
+                                    value.toLocaleString("en-IN");
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+    );
+
+
+
+    // =====================================
+    // BALANCE TREND
+    // =====================================
+
+    const balanceTrendCanvas =
+        document.getElementById(
+            "balanceTrendChart"
+        );
+
+
+    new Chart(
+        balanceTrendCanvas,
+        {
+
+            type: "line",
+
+            data: {
+
+                labels: balanceTrend.map(
+                    item => item.day
+                ),
+
+                datasets: [
+
+                    {
+
+                        label: "Balance",
+
+                        data: balanceTrend.map(
+                            item => item.balance
+                        ),
+
+                        tension: 0.3,
+
+                        fill: true,
+
+                        pointRadius: 4
+
+                    }
+
+                ]
+
+            },
+
+            options: {
+
+                responsive: true,
+
+                maintainAspectRatio: false,
+
+                plugins: {
+
+                    legend: {
+                        display: false
+                    }
+
+                },
+
+                scales: {
+
+                    y: {
+
+                        ticks: {
+
+                            callback: function(value) {
+
+                                return "₹" +
+                                    value.toLocaleString("en-IN");
+
+                            }
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+    );
+
+</script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Donations - Office Snack Fund</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f6fa;
+            margin: 0;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .form-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: bold;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            background: #28a745;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #218838;
+        }
+
+        .table-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: #f1f1f1;
+        }
+
+        .amount {
+            color: green;
+            font-weight: bold;
+        }
+
+        .back {
+            display: inline-block;
+            margin-bottom: 20px;
+            text-decoration: none;
+            color: #333;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <a href="/" class="back">← Back to Dashboard</a>
+
+    <h1>💰 Donations</h1>
+
+
+
+    <!-- ADD DONATION FORM -->
+
+    <div class="form-card">
+
+        <h2>Add Donation</h2>
+
+        <form action="/add-donation" method="POST">
+
+            <div class="form-row">
+
+                <div class="form-group">
+
+                    <label>Donor Name</label>
+
+                    <input
+                        type="text"
+                        name="donor_name"
+                        placeholder="Enter employee name"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>Amount (₹)</label>
+
+                    <input
+                        type="number"
+                        name="amount"
+                        id="amount"
+                        step="0.01"
+                        min="0"
+                        placeholder="Enter amount"
+                        required
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+    <label>Payment Mode</label>
+
+    <select
+        name="payment_mode"
+        id="payment_mode"
+        onchange="showUPIQRCode()"
+    >
+
+        <option value="Cash">
+            Cash
+        </option>
+
+        <option value="UPI">
+            UPI
+        </option>
+
+        <option value="Bank Transfer">
+            Bank Transfer
+        </option>
+
+        <option value="Other">
+            Other
+        </option>
+
+    </select>
+
+</div>
+
+
+<!-- UPI QR CODE -->
+
+<div
+    id="upi-section"
+    style="
+        display: none;
+        text-align: center;
+        margin-top: 25px;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        background: #fafafa;
+    "
+>
+
+    <h3>📱 Scan & Pay using UPI</h3>
+
+    <img
+        src="{{ url_for('static', filename='images/upi_qr.png') }}"
+        alt="UPI QR Code"
+        width="250"
+        height="250"
+        style="object-fit: contain;"
+    >
+
+    <p>
+        Scan this QR code using your UPI app.<br>
+        For UPI minimum Rs.100 is required.
+    </p>
+
+</div>
+
+            </div>
+
+
+            <div class="form-group" style="margin-top: 15px;">
+
+                <label for="note">
+                    Note / UPI Transaction ID
+                </label>
+
+                <input
+                    type="text"             
+                    name="note"
+                    id="note"
+                    rows="3"
+                    placeholder="Optional note"
+                >
+
+            </div>
+
+
+            <button type="submit">
+                + Add Donation
+            </button>
+
+        </form>
+
+    </div>
+
+
+    <!-- DONATION HISTORY -->
+         <div style="
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+">
+
+    <div style="
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+">
+
+    <form
+        method="GET"
+        action="/donations"
+        style="margin: 0;"
+    >
+
+        <label>
+            <strong>Filter by Month:</strong>
+        </label>
+
+        <input
+            type="month"
+            name="month"
+            value="{{ selected_month or '' }}"
+        >
+
+        <button type="submit">
+            🔍 Filter
+        </button>
+
+        <a
+            href="/donations"
+            style="margin-left: 10px;"
+        >
+            Clear
+        </a>
+
+    </form>
+
+
+    {% if session["role"] == "admin" %}
+
+   {% if session["role"] == "admin" %}
+
+<a
+    href="/download-donations{% if selected_month %}?month={{ selected_month }}{% endif %}"
+>
+    📥 Download History
+</a>
+
+{% endif %}
+
+    {% endif %}
+
+</div>
+
+</div>
+
+    <div class="table-card">
+
+        <h2>Donation History</h2>
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <!-- <th>#</th> -->
+                    <th>Date</th>
+                    <th>Donor</th>
+                    <th>Amount</th>
+                    <th>Payment Mode</th>
+                    <th>Note</th>
+                    <th>Actions</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for donation in donations %}
+
+                <tr>
+
+                    <!-- <td>
+                        {{ donation.id }}
+                    </td> -->
+                    <!-- <td>
+                        {{ loop.index }}
+                    </td> -->
+
+                    <td>
+                        {{ donation.date | datetime }}
+                    </td>
+
+                    <td>
+                        {{ donation.donor_name }}
+                    </td>
+
+                    <td class="amount">
+                        ₹{{ "%.2f"|format(donation.amount) }}
+                    </td>
+
+                    <td>
+                        {{ donation.payment_mode }}
+                    </td>
+
+                    <td>
+                        {{ donation.note }}
+                    </td>
+                    <td>
+
+    <a href="/edit-donation/{{ donation.id }}"
+       style="color: blue; margin-right: 10px;">
+        ✏️ Edit
+    </a>
+
+    <form
+        action="/delete-donation/{{ donation.id }}"
+        method="POST"
+        style="display:inline;"
+        onsubmit="return confirm('Are you sure you want to delete this donation?');"
+    >
+
+        <button
+            type="submit"
+            style="
+                background:none;
+                border:none;
+                color:red;
+                cursor:pointer;
+                padding:0;
+                margin:0;
+            "
+        >
+            🗑️ Delete
+        </button>
+
+    </form>
+
+</td>
+
+                </tr>
+
+                {% else %}
+
+                <tr>
+
+                    <td colspan="7" style="text-align:center;">
+                        No donations recorded yet.
+                    </td>
+
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+<script>
+
+function showUPIQRCode() {
+
+    const paymentMode =
+        document.getElementById("payment_mode").value;
+
+    const upiSection =
+        document.getElementById("upi-section");
+
+    const amount =
+        document.getElementById("amount");
+
+    const note =
+        document.getElementById("note");
+
+
+    if (paymentMode === "UPI") {
+
+        // Fixed UPI amount
+        amount.value = "100";
+        amount.readOnly = true;
+
+        // Show QR
+        upiSection.style.display = "block";
+
+        // UPI transaction ID is mandatory
+        note.required = true;
+        note.placeholder = "Enter UPI Transaction ID / UTR";
+
+    } else {
+
+        // Normal donation amount
+        amount.value = "";
+        amount.readOnly = false;
+
+        // Hide QR
+        upiSection.style.display = "none";
+
+        // Note is optional
+        note.required = false;
+        note.placeholder = "Optional note";
+    }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Edit Expense</title>
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f6fa;
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 700px;
+            margin: auto;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 6px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 11px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+        }
+
+        .cancel {
+            background: #6c757d;
+            text-decoration: none;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 5px;
+            margin-left: 5px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="card">
+
+        <h1>✏️ Edit Expense</h1>
+
+        <form method="POST">
+
+            <div class="form-group">
+
+                <label>Item</label>
+
+                <input
+                    type="text"
+                    name="item"
+                    value="{{ expense.item }}"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Amount (₹)</label>
+
+                <input
+                    type="number"
+                    name="amount"
+                    step="0.01"
+                    min="0"
+                    value="{{ expense.amount }}"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Paid By</label>
+
+                <input
+                    type="text"
+                    name="paid_by"
+                    value="{{ expense.paid_by }}"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Category</label>
+
+                <select name="category">
+
+                    <option value="Snacks"
+                        {% if expense.category == "Snacks" %}selected{% endif %}>
+                        Snacks
+                    </option>
+
+                    <option value="Tea/Coffee"
+                        {% if expense.category == "Tea/Coffee" %}selected{% endif %}>
+                        Tea / Coffee
+                    </option>
+
+                    <option value="Biscuits"
+                        {% if expense.category == "Biscuits" %}selected{% endif %}>
+                        Biscuits
+                    </option>
+
+                    <option value="Other"
+                        {% if expense.category == "Other" %}selected{% endif %}>
+                        Other
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Note</label>
+
+                <input
+                    type="text"
+                    name="note"
+                    value="{{ expense.note or '' }}"
+                >
+
+            </div>
+
+
+            <button type="submit">
+                Save Changes
+            </button>
+
+            <a href="/expenses" class="cancel">
+                Cancel
+            </a>
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
